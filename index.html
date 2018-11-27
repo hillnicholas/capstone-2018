@@ -1,0 +1,204 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+        <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+    <script src="https://unpkg.com/konva@2.4.2/konva.min.js"></script>
+    <meta charset="utf-8">
+    <title>CS/CPE/EE 481 Capstone</title>
+    
+    <div id="sideBar">
+	    <div class="option"></div>
+        <div class="option" onClick="clickedSettings()">
+            <span class="link-title">Settings</span>
+            <span> <img src="wrench.png"></span>
+        </div>
+        <div class="option" onClick="clickedReset()">
+            <span class="link-title">reset </span>
+            <span> <img src="reset.png"></span>
+        </div>
+        <div class="option" onClick="clickedParameters()">
+            <span class="link-title"> Tracking Parameters </span>
+            <span> <img src="parameters.png"></span>
+        </div>
+        <div class="option" onClick="alert('Params!')">
+                <span class="link-title"> Log Off </span>
+                <span> <img src="logout.png"></span>
+        </div>
+    </div>
+    <div id="topBar">
+      <span>
+        <img src="wvu.png" id="wvu">
+      </span>
+      <span>
+        <h1> 2018 Engineering Capstone <h1>
+      </span>
+  </div>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #F0F0F0;
+            font-family: 'Sans Seriff'; /*Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode',*/
+        }
+
+        #wvu { 
+            height: 45px;
+
+        }
+        #topBar h1 { 
+            display: inline-block;
+            vertical-align: top;
+            padding-left: 20px;
+        }
+        #topBar { 
+            
+            width: 100%;
+            height: 50px;
+            left: 0;
+            right: 0;
+            top:0;
+            z-index: 10000;
+            background-color: rgb(71, 81, 126);
+            color: whitesmoke;
+            position: absolute;
+            padding-left: 20px;
+	        font-size: 12px;
+            border-bottom-width: 5px;
+            border-bottom-color: rgb(95, 95, 95);
+            border-bottom-style: solid;
+        }
+
+	.option {
+	    height: 80px;
+ 	    vertical-align: middle;
+
+	}
+
+ 	.option:hover { 
+		background-color: #585858;
+	}
+
+	#sideBar img { 
+	    width: 40px;
+        float: right;
+	    padding-right: 15px;
+	} 
+
+        #sideBar {
+            position: absolute;
+            width: 70px;
+            height: 100%;
+            top: 0;
+            left: 0;
+            margin: 0;
+            background-color: gray;
+            transition: width 0.2s;
+
+        }
+
+        #sideBar:hover { 
+            width: 200px;
+        }
+
+	
+	#sideBar:hover .link-title {
+		margin-left: 20px;
+		font-weight: bold;
+		color: white;
+		font-size: 20px;
+		display: inline;
+	}
+
+	#sideBar .link-title {
+		display: none;
+	}
+
+    #container {
+        text-align: center;
+        margin: auto;
+        width: 80%;
+    }
+
+    #settingsPopupBox { 
+        visibility: hidden;
+        position: absolute;
+        width: 500px;
+        height: 200px;
+        top: 40%;
+        left: 40%;
+        z-index: 1;
+        background-color: whitesmoke;
+        border-color: gray;
+        border-width: 4px;
+        border-style: solid;
+    }
+    #settingsPopupBoxHeader { 
+        width: 100%;
+        height: 25px;
+        background-color: rgb(152, 143, 202);
+    }
+
+    
+    #parametersPopupBox { 
+        visibility: hidden;
+        position: absolute;
+        width: 500px;
+        height: 200px;
+        top: 40%;
+        left: 40%;
+        z-index: 1;
+        background-color: whitesmoke;
+        border-color: gray;
+        border-width: 4px;
+        border-style: solid;
+    }
+
+    #parametersPopupBoxHeader { 
+        width: 100%;
+        height: 25px;
+        background-color: rgb(152, 143, 202);
+    }
+
+
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+    <script src="src.js"></script>
+    <div id="settingsPopupBox">
+        <div id="settingsPopupBoxHeader">Settings<button style="float: right; padding: 2px;" onclick="closeSettings()"> X </button></div>
+        <div style="margin: 1px; padding: 10px; border-style: solid; border-width: 2px; width: 50%;">
+            Zoom<br>
+            <button onClick="scale += 0.1; drawMap()">Zoom In</button>
+            <button onClick="scale -= 0.1; drawMap()">Zoom Out</button>
+        </div>  
+        <div style="margin: 1px; padding: 10px; border-style: solid; border-width: 2px; width: 50%;">
+                Pixel Scaling<br>
+                <label>feet</label>
+                <input type="number" id="calibrationDistance">
+                <button onClick="startCalibration()">Calibrate</button>
+                <span id="calibrationMessage"></span>
+        </div>  
+    </div>
+
+    <div id="parametersPopupBox">
+        <div id="parametersPopupBoxHeader">Parameters<button style="float: right; padding: 2px;" onclick="closeParameters()"> X </button></div>
+        <div style="margin: 1px; padding: 10px; border-style: solid; border-width: 2px; width: 80%;">
+            Searched MAC Address<br>
+            <span id="currentMacAddress"></span><br>
+            <input type="text" maxlength="2" size="1" id="mac0">:
+            <input type="text" maxlength="2" size="1" id="mac1">:
+            <input type="text" maxlength="2" size="1" id="mac2">:
+            <input type="text" maxlength="2" size="1" id="mac3">:
+            <input type="text" maxlength="2" size="1" id="mac4">:
+            <input type="text" maxlength="2" size="1" id="mac5">
+            <button onClick="updateMacAddress()">Update</button>
+        </div>
+    </div>
+
+</body>
+<script src="draggable.js"></script>
+</html>
