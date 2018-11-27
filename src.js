@@ -596,3 +596,37 @@ function updateMacAddress() {
 
 main();
 
+// bogus 
+function login() {
+    
+    // the most secure evar
+    if( document.getElementById("username").value === "root" && document.getElementById("password").value === "capstone" ) {
+        startLoader();
+    }  
+    else { 
+        document.getElementById("loginErrorMessage").style.display = "block";
+    }
+}
+
+function startLoader() { 
+    document.getElementsByClassName("login-middle")[0].innerHTML = `
+        loading...
+        <div id="ui-loader-wrapper">
+            <div id="ui-loader">
+            </div>
+        </div>
+    `
+    let counter = 0;
+    let maxWidth = document.getElementById("ui-loader-wrapper").offsetWidth;
+    let interval = setInterval( function() { 
+        if ( counter >= maxWidth ) {
+            clearInterval( interval );
+            document.getElementById("login-screen").style.visibility = "hidden";
+        }
+        else {
+            document.getElementById('ui-loader').style.width = counter + "px";
+            let min=1; max=10;
+            counter +=  Math.floor(Math.random() * (max - min) ) + min;;
+        }
+    }, 20 );
+}
