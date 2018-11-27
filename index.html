@@ -8,7 +8,7 @@
     <title>CS/CPE/EE 481 Capstone</title>
     
     <div id="sideBar">
-	    <div class="option"></div>
+	    <div class="option-no-hover"></div>
         <div class="option" onClick="clickedSettings()">
             <span class="link-title">Settings</span>
             <span> <img src="wrench.png"></span>
@@ -47,7 +47,9 @@
             background-color: #F0F0F0;
             font-family: 'Sans Seriff'; /*Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode',*/
         }
-
+        .option-no-hover { 
+            height: 80px;
+        }
         #wvu { 
             height: 45px;
 
@@ -213,17 +215,97 @@
         height: 20px;
         font-size: 15px;
     }
+
+    .login-screen { 
+        z-index: 10000;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: url(wvu.jpg); 
+        background-size: 100% 100%;
+        color: white;
+    }
+
+    .login-screen input,button { 
+        border-color: rgb(0, 0, 95);
+        border-radius: 5px;
+        height: 25px;
+        margin: auto;
+        width: 100%;
+    }
+
+    .login-screen button { 
+        padding-left: 10px;
+        margin: 0;
+        width: 101%;
+        background-color: rgb(8, 8, 114);
+        opacity: 0.6;
+        /*text-align: left;*/
+        height: 30px;
+        border-color: black;
+        border-width: 2px;
+        border-style: solid;
+        color: white;
+        font-size: 12px;
+    }
+    .login-screen button:hover { 
+        opacity: 0.8;
+    }
+
+    #login-button { 
+        height: 100%;
+        background-color: green; 
+    }
+    .login-middle {
+        display: block;
+        width: 350px;
+        height: 420px;
+        margin: 200px auto;
+        align-content: center;
+        background-color: rgb(31, 31, 75);
+        border-style: solid;
+        border-width: 5px;
+        border-color: rgb(41, 41, 109);
+        border-radius: 10px;
+        padding-left: 20px;
+        padding-right: 20px;
+    }   
+
+    #wvulogo { 
+        width: 100px;
+        height: auto;
+        display:block;
+        margin:auto;
+        padding: 20px;
+    }
     </style>
 </head>
 <body>
+    <div class="login-screen">
+        <div class="login-middle">
+
+            <span style="height: 100%; text-align: center">
+                <h1> WVU Capstone 2018 </h1>
+                <h3> Wifi Signal Source Localization </h3>
+                <h4> Nicholas Hill, Adam Ketterman, Waleed </h4>
+                <img  id="wvulogo" src="wvu.png">
+                <input type="text" id="username" placeholder="username">
+                <input type="password" id="password" placeholder="password">
+                <button>Log In</button>
+            </span>
+        </div>
+    </div>
+
     <div id="container"></div>
     <script src="src.js"></script>
     <div id="settingsPopupBox">
         <div id="settingsPopupBoxHeader">Settings<button style="float: right; padding: 2px;" onclick="closeSettings()"> X </button></div>
         <div style="margin: 1px; padding: 10px; border-style: solid; border-width: 2px; width: 50%;">
             Zoom<br>
-            <button onClick="scale += 0.1; drawMap()">Zoom In</button>
-            <button onClick="scale -= 0.1; drawMap()">Zoom Out</button>
+            <button onClick=" onZoomIn()">Zoom In</button>
+            <button onClick="onZoomOut()">Zoom Out</button>
         </div>  
         <div class="popup-section" style="width: 50%;">
                 Pixel Scaling<br>
@@ -254,12 +336,12 @@
             <table id="datapoints">
               <th>MAC Address </th> <th> Power </th> <th>Predicted distance</th>
                 <tr>
-                    <td>test</td>
+                    <td></td>
                     <td></td>
                     <td></td>
                 </tr>
                 <tr>
-                    <td>test2</td>
+                    <td></td>
                     <td></td>
                     <td></td>
                 </tr>
@@ -299,10 +381,13 @@
             </span>
             <div>
             <button onClick="requestSniffing()">sniff</button>
-            <span style="color: red;" id="sniffMessage"></span>
+            <button onClick="requestRecord()">record</button>
+            <button onclick="requestFlushSnifferData()">reset</button>
+            <div style="color: red;" id="sniffMessage"></div>
             </div> 
         </div>
     </div>
+
 </body>
 <script src="draggable.js"></script>
 </html>

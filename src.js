@@ -18,7 +18,7 @@ let scaleDistance = 20 ;
 let pixelToFoot = 174.0/ scaleDistance;
 let pixelToMeter = pixelToFoot / 0.3048;
 let calibrationDistance;
-let searchedMacAddress;
+let searchedMacAddress = ['ff','ff','ff','ff','ff','ff'];
 var width = window.innerWidth;
 var height = window.innerHeight;
 
@@ -32,25 +32,50 @@ var stage = new Konva.Stage({
 var map;
 var layer = new Konva.Layer();
 
+
+
+var imageObj;
+
+function reloadMap() {
+    imageObj = new Image();
+
+    imageObj.onload = function() {
+
+        map = new Konva.Image({
+            x: 50,
+            y: 50,
+            image: imageObj
+        });
+
+        map.scale({ x: scale, y: scale });
+        drawMap();
+    }
+    imageObj.src = "aermap-cropped.jpg";
+}
+
+reloadMap();
+
+
+function onZoomOut() { 
+    scale -= 0.02;
+    reloadMap();
+    clickedReset();
+}
+
+function onZoomIn() { 
+    scale += 0.02;
+    reloadMap();
+    clickedReset();
+}
+
+
 function drawMap() {
 	layer.clear();
 	layer = new Konva.Layer();
-    var imageObj = new Image();
-    imageObj.onload = function() {
-
-      map = new Konva.Image({
-        x: 50,
-        y: 50,
-        image: imageObj
-      });
-
-    map.scale({ x: scale, y: scale });
-
+    
     layer.add( map );
     stage.add( layer );
-    }
     
-    imageObj.src = "aermap-cropped.jpg";
 }
 
     
@@ -59,14 +84,41 @@ stage.on('click', function () {
 	
 	switch( mode ) {
 		case "calculation":
-			onCalculation();
+            //onCalculation();
+            onSelectSpot();
 			break;
 
 		case "calibrateDistance":
-			onCalibrateDistance();
+            onCalibrateDistance();
+            break;
+        case "selectSpot":
+            onSelectSpot();
+            break;
 	}
 })
 
+function newFrame() { 
+    clickedDatapoints();
+    drawMap();
+    drawAllPoints();
+}
+
+let currentPosition;
+function onSelectSpot() {
+
+    newFrame();
+    currentPosition = stage.getPointerPosition();
+    document.getElementById("currentCoordinates").innerText = pixelToMeter * currentPosition.x.toString().substr(0,6)  + "', " + currentPosition.y.toString().substr(0,6) + "'";
+
+    layer.add(new Konva.Circle({
+        x: currentPosition.x,
+        y: currentPosition.y,
+        fill: 'black',
+        radius: 10
+    }));
+        
+    layer.draw();
+}
 
 calibrationParams = [];
 function onCalibrateDistance() { 
@@ -93,36 +145,82 @@ function onCalibrateDistance() {
 		calibrationParams = [];
 	} 
 }
-console.log( "ptm: " + pixelToMeter );
+
+function onUpdatePower() { 
+    /*if( currentPoint - 1 < 0 ) {
+        console.log("DEBUG: under 0");
+        return;
+    }
+    let power =  snifferData.reduce( ( i, obj ) => i + obj.power, 0 ) / snifferData.length;
+    let distanceRadius = getDistanceFromPower( power );
+    //points[ currentPoint - 1 ].power = power; 
+    points[ currentPoint - 1 ].distanceRadius = distanceRadius;*/
+}
+
+
+function drawAllPoints() { 
+    for( var i = 0; i < currentPoint - 1; i ++ ) {
+        pos = points[ i ].pos;
+        distanceRadius = points[ i ].distanceRadius;
+        
+        layer.add(new Konva.Circle({
+            x: pos.x,
+            y: pos.y,
+            fill: 'black',
+            radius: 10
+        }));
+
+        layer.add(new Konva.Circle({
+		    x: pos.x,
+		    y: pos.y,
+			stroke: 'black',
+			fill: 'gray',
+			opacity: 0.2,
+            strokeWidth: 2,
+		    radius: distanceRadius
+		}));
+		layer.draw();
+    }
+}
 
 function onCalculation() {
-	var pos = stage.getPointerPosition();
+    console.log( points );
+    var distanceRadius, pos;
+    /*for( var i = 0; i < currentPoint - 1; i ++ ) {
 
-	if( currentPoint - 1 === points.length ) return;
-
+        pos = points[ i ].pos;
+        distanceRadius = points[ i ].distanceRadius;
+        layer.add(new Konva.Circle({
+		    x: pos.x,
+		    y: pos.y,
+			stroke: color,
+			fill: 'gray',
+			opacity: 0.2,
+            strokeWidth: 2,
+		    radius: distanceRadius
+		}));
+		layer.draw();
+    }
+    return;
+    // 
 	if( currentPoint - 1 < points.length ) { 
 		// now we find relative point
 
-		var color = pointConfig[ currentPoint - 1 ].color;
+		var color = 'black';
 
-		points[ currentPoint - 1 ].pos = pos;
-		
 		// PLACEHOLDER for power
-		let max = -40;
-		let min = -64;
-		let power = Math.floor(Math.random() * (max - min) ) + min;
-		let distanceRadius = getDistanceFromPower( power );
+		//let max = -40;
+		//let min = -64;
+		//let power = Math.floor(Math.random() * (max - min) ) + min;
 
-		points[ currentPoint - 1 ].power = power; 
-		points[ currentPoint - 1 ].distanceRadius = distanceRadius;
 
 		// draw point
-		layer.add(new Konva.Circle({
+		/*layer.add(new Konva.Circle({
 		    x: pos.x,
 		    y: pos.y,
 		    fill: color,
 		    radius: 10
-		}));
+		}));*
 
 		// draw radius
 		layer.add(new Konva.Circle({
@@ -138,7 +236,7 @@ function onCalculation() {
 
 		currentPoint += 1;
 	}
-
+    */
 	if( currentPoint - 1 === points.length ) { 
 	
 		let specialPoints = Array(3);
@@ -305,7 +403,6 @@ function onCalculation() {
 
 		layer.add( triangle );
 		layer.draw();
-		currentPoint ++;
 	}
 }
 
@@ -411,38 +508,80 @@ function requestSniffing() {
     let distance = getDistanceFromPower( power ) / pixelToMeter;
     console.log( distance );
     if( snifferData.length < 7 ) {
+        document.getElementById("sniffMessage").innerHTML = "";
+
         snifferData.push({
             macAddr: macAddr,
             power: power,
             distance: distance
         });
-
-        // fill table
-        let table = document.getElementById("datapoints");
-        let row;
-        for( var i = 0; i < snifferData.length; i ++ ) {
-            row = table.rows[i + 1];
-            row.cells[0].innerText = snifferData[i].macAddr;
-            row.cells[1].innerText = snifferData[i].power;
-            row.cells[2].innerText = snifferData[i].distance;
-        }
-
+        fillSnifferTable();
         let average =  snifferData.reduce( ( i, obj ) => i + obj.power, 0 ) / snifferData.length;
         
-        document.getElementById("averagePower").innerText = average; 
+
+        document.getElementById("averagePower").innerText = average.toString().length < 7 ? average.toString() : average.toString().substr(0,7); 
     }
     else { 
         document.getElementById("sniffMessage").innerText = "Cannot sniff anymore.";
     }
+}
 
+function fillSnifferTable() { 
+        // fill table
+        let table = document.getElementById("datapoints");
+        let row;
+        // clear first
+        for( var i = 0; i < 7; i ++ ) { 
+            row = table.rows[ i + 1 ];
+
+            for( var j = 0; j < 3; j ++ ) {
+                row.cells[j].innerText = "";
+            }
+        }
+
+        for( var i = 0; i < snifferData.length; i ++ ) {
+            row = table.rows[i + 1];
+            row.cells[0].innerText = snifferData[i].macAddr.join(":");
+            row.cells[1].innerText = snifferData[i].power;
+            row.cells[2].innerText = snifferData[i].distance;
+        }
 
 }
 
+function requestRecord() {
+
+    if( ! currentPosition ) { 
+        console.log( "NO POS");
+        return;
+    }
+
+    if( currentPoint <= 3 ) {
+    let average =  snifferData.reduce( ( i, obj ) => i + obj.power, 0 ) / snifferData.length;
+    points[ currentPoint - 1 ].power = average;
+    points[ currentPoint - 1 ].distanceRadius = getDistanceFromPower( average );
+    points[ currentPoint - 1 ].pos = currentPosition;
+    currentPoint ++;
+    newFrame();
+    requestFlushSnifferData();
+    }
+    if( currentPoint >= 4 ) { 
+        console.log("FOUR!");
+        onCalculation();
+        return;
+    } 
+    //onCalculation(); // currentPosition, average );
+
+}
+
+function requestFlushSnifferData() {
+    snifferData = [];
+    fillSnifferTable();
+}
 
 
 function main() {
 	clearMap();
-	drawMap();
+	//drawMap();
 	document.onload = function () { 
 	}
 }
@@ -452,7 +591,7 @@ function updateMacAddress() {
 	for(var i = 0; i < 6; i ++ ) {
 		searchedMacAddress.push( document.getElementById("mac" + i).value);
 	}
-
+    document.getElementById("currentMacAddress").innerText = searchedMacAddress.join(":");
 }
 
 main();
