@@ -21,9 +21,13 @@
             <span class="link-title"> Tracking Parameters </span>
             <span> <img src="parameters.png"></span>
         </div>
-        <div class="option" onClick="alert('Params!')">
+        <div class="option" onClick="alert('logout')">
                 <span class="link-title"> Log Off </span>
                 <span> <img src="logout.png"></span>
+        </div>
+        <div class="option" onClick="clickedDatapoints()">
+            <span class="link-title"> Datapoints </span>
+            <span> <img src="data.png"></span>
         </div>
     </div>
     <div id="topBar">
@@ -136,9 +140,11 @@
         border-style: solid;
     }
     #settingsPopupBoxHeader { 
-        width: 100%;
+        width: 98%;
         height: 25px;
         background-color: rgb(152, 143, 202);
+        padding-left: 2%;
+        color: whitesmoke;
     }
 
     
@@ -147,8 +153,8 @@
         position: absolute;
         width: 500px;
         height: 200px;
-        top: 40%;
-        left: 40%;
+        top: 41%;
+        left: 41%;
         z-index: 1;
         background-color: whitesmoke;
         border-color: gray;
@@ -157,12 +163,56 @@
     }
 
     #parametersPopupBoxHeader { 
-        width: 100%;
+        width: 98%;
         height: 25px;
         background-color: rgb(152, 143, 202);
+        padding-left: 2%;
+        color: whitesmoke;
     }
 
+    #datapointsPopupBox { 
+        visibility: hidden;
+        position: absolute;
+        width: 500px;
+        height: 400px;
+        top: 42%;
+        left: 42%;
+        z-index: 1;
+        background-color: whitesmoke;
+        border-color: gray;
+        border-width: 4px;
+        border-style: solid;
+        border-radius: 4px;
+    }
 
+    #datapointsPopupBoxHeader { 
+        width: 98%;
+        height: 25px;
+        background-color: rgb(152, 143, 202);
+        padding-left: 2%;
+        color: whitesmoke;
+    }
+
+    .popup-section { 
+        margin: 1px;
+        padding: 10px;
+        border-style: solid; 
+        border-width: 2px; 
+        width: 80%; 
+        border-radius: 4px;
+        border-color: grey;
+    }
+
+    table {
+        border-collapse: collapse;
+    }
+    
+    #datapoints th, tr, td {
+        border: 1px solid black;
+        padding: 2px;
+        height: 20px;
+        font-size: 15px;
+    }
     </style>
 </head>
 <body>
@@ -175,7 +225,7 @@
             <button onClick="scale += 0.1; drawMap()">Zoom In</button>
             <button onClick="scale -= 0.1; drawMap()">Zoom Out</button>
         </div>  
-        <div style="margin: 1px; padding: 10px; border-style: solid; border-width: 2px; width: 50%;">
+        <div class="popup-section" style="width: 50%;">
                 Pixel Scaling<br>
                 <label>feet</label>
                 <input type="number" id="calibrationDistance">
@@ -186,7 +236,7 @@
 
     <div id="parametersPopupBox">
         <div id="parametersPopupBoxHeader">Parameters<button style="float: right; padding: 2px;" onclick="closeParameters()"> X </button></div>
-        <div style="margin: 1px; padding: 10px; border-style: solid; border-width: 2px; width: 80%;">
+        <div class="popup-section">
             Searched MAC Address<br>
             <span id="currentMacAddress"></span><br>
             <input type="text" maxlength="2" size="1" id="mac0">:
@@ -198,7 +248,61 @@
             <button onClick="updateMacAddress()">Update</button>
         </div>
     </div>
-
+    <div id="datapointsPopupBox">
+        <div id="datapointsPopupBoxHeader">Datapoints<button style="float: right; padding: 2px;" onclick="closeDatapoints()"> X </button></div>
+        <div class="popup-section">
+            <table id="datapoints">
+              <th>MAC Address </th> <th> Power </th> <th>Predicted distance</th>
+                <tr>
+                    <td>test</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>test2</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
+        <div class="popup-section">
+            <span style="width: 49%; display: inline-block;">
+                    Average Power: <span id="averagePower"></span> 
+            </span>
+            <span style="width: 49%;  display: inline-block;">
+                    Coordinates: <span id="currentCoordinates"></span>
+            </span>
+            <div>
+            <button onClick="requestSniffing()">sniff</button>
+            <span style="color: red;" id="sniffMessage"></span>
+            </div> 
+        </div>
+    </div>
 </body>
 <script src="draggable.js"></script>
 </html>

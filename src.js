@@ -342,7 +342,9 @@ function calculate() {
 }
 
 function clickedSettings() { 
-	document.getElementById("settingsPopupBox").style.visibility = "visible";
+    document.getElementById("settingsPopupBox").style.visibility = "visible";
+    sendAllToBottom();
+    sendToTop( "settingsPopupBox");
 }
 
 function closeSettings() { 
@@ -353,10 +355,22 @@ function clickedParameters() {
 	document.getElementById("parametersPopupBox").style.visibility = "visible";
 	let currentMacAddress = searchedMacAddress ? searchedMacAddress.join(":") : "Not defined yet";
 	document.getElementById("currentMacAddress").innerText = "Current MAC address: " + currentMacAddress;
+    sendAllToBottom();
+    sendToTop( "parametersPopupBox");
 }
 
 function closeParameters() { 
 	document.getElementById("parametersPopupBox").style.visibility = "hidden";
+}
+
+function clickedDatapoints() {
+    document.getElementById("datapointsPopupBox").style.visibility = "visible";
+    sendAllToBottom();
+    sendToTop( "datapointsPopupBox");
+}
+
+function closeDatapoints() {
+	document.getElementById("datapointsPopupBox").style.visibility = "hidden";
 }
 
 function startCalibration() {
@@ -381,7 +395,48 @@ function doCirclesIntersect(point1, point2 ) {
 	return distance < point1.distanceRadius + point2.distanceRadius;
 }
 
+let snifferData = [];
+function requestSniffing() {
 
+    let macAddr = searchedMacAddress ? searchedMacAddress : "None";
+    if( macAddr === "None" ) {
+        document.getElementById("sniffMessage").innerHTML = "You must specify a MAC address. <button onClick='clickedParameters()'>Open parameter settings</button>";
+        return;
+    }
+    // PLACEHOLDER for power
+	let max = -40;
+	let min = -64;
+    let power = Math.floor(Math.random() * (max - min) ) + min;
+        
+    let distance = getDistanceFromPower( power ) / pixelToMeter;
+    console.log( distance );
+    if( snifferData.length < 7 ) {
+        snifferData.push({
+            macAddr: macAddr,
+            power: power,
+            distance: distance
+        });
+
+        // fill table
+        let table = document.getElementById("datapoints");
+        let row;
+        for( var i = 0; i < snifferData.length; i ++ ) {
+            row = table.rows[i + 1];
+            row.cells[0].innerText = snifferData[i].macAddr;
+            row.cells[1].innerText = snifferData[i].power;
+            row.cells[2].innerText = snifferData[i].distance;
+        }
+
+        let average =  snifferData.reduce( ( i, obj ) => i + obj.power, 0 ) / snifferData.length;
+        
+        document.getElementById("averagePower").innerText = average; 
+    }
+    else { 
+        document.getElementById("sniffMessage").innerText = "Cannot sniff anymore.";
+    }
+
+
+}
 
 
 
@@ -397,7 +452,7 @@ function updateMacAddress() {
 	for(var i = 0; i < 6; i ++ ) {
 		searchedMacAddress.push( document.getElementById("mac" + i).value);
 	}
-	console.log( searchedMacAddress.join( ":" ));
+
 }
 
 main();
