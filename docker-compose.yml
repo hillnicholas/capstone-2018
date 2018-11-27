@@ -1,0 +1,7 @@
+webserver:
+  image: nginx
+  volumes:
+   - ./capstone.conf:/etc/nginx/conf.d/capstone.conf
+   - ./workingdir:/var/www/html
+  ports:
+   - "8080:80"

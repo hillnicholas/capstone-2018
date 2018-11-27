@@ -1,0 +1,97 @@
+- hosts: all
+  user: ec2-user
+  strategy: free
+  become: yes
+  tasks:
+
+    - name: install epel-release
+      yum:
+        name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+        state: present
+
+    - name: upgrade existing packages
+      yum:
+        name: "*"
+        state: latest
+
+    - name: install docker
+      yum:
+        name: docker
+        state: latest
+
+    - name: install openvpn
+      yum:
+        name: openvpn
+        state: latest
+
+    - name: install git
+      yum:
+        name: git
+        state: latest
+
+    - name: install python-pip
+      yum:
+        name: python-pip
+        state: latest
+
+    - name: install docker-compose (pip)
+      pip:
+        name: docker-compose
+
+    - name: Create group docker if it doesn't already exist
+      group:
+        name: docker
+        state: present
+
+    - name: Create group sudo if it doesn't already exist
+      group:
+        name: sudo
+        state: present
+
+    - name: make sudo nopasswd
+      copy:
+        content: "%sudo ALL=(ALL) NOPASSWD: ALL"
+        dest: "/etc/sudoers.d/group-sudo"
+
+    - name: add Nick as a user
+      user:
+        name: nick
+        shell: /bin/bash
+        groups: sudo, docker
+
+    - name: copy authorized SSH key
+      authorized_key:
+        user: nick
+        state: present
+        key: "{{ lookup( 'file', '/home/nick/.ssh/id_rsa.pub') }}"
+
+    - name: copy gitlab SSH key
+      copy:
+        src: gitlab-key
+        dest: /home/nick/.ssh/gitlab-key
+        owner: nick
+        mode: 0700
+
+    - name: copy gitlab SSH key
+      copy:
+        src: gitlab-key.pub
+        dest: /home/nick/.ssh/gitlab-key.pub
+        owner: nick
+        mode: 0700
+
+    - name: copy SSH config
+      copy:
+        src: ssh-config
+        dest: /home/nick/.ssh/config
+        owner: nick
+        mode: 0400
+
+    - name: configure git to use user "nick"
+      command: git config --global user.name "Nicholas Hill" && \
+               git config --global user.email "nick@hillnetwork.me"
+
+    - name: start docker service
+      systemd:
+        name: docker
+        state: started
+        enabled: true
