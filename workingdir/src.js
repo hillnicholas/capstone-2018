@@ -596,7 +596,7 @@ function updateMacAddress() {
 
 main();
 
-// bogus 
+
 function login() {
     
     // the most secure evar
@@ -607,6 +607,11 @@ function login() {
         document.getElementById("loginErrorMessage").style.display = "block";
     }
 }
+
+function logout() {
+	document.getElementById("login-screen").style.visibility = "visible";
+}
+
 
 function startLoader() { 
     document.getElementsByClassName("login-middle")[0].innerHTML = `
