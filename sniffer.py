@@ -32,7 +32,7 @@ class Sniffer:
         try:
             output = subprocess.check_output("timeout {} /usr/sbin/tcpdump {} {} -c {} '{}'".format( self.timeout, iface_flag, interface, count, sniff_filter ),stderr=open(os.devnull, 'w'), shell=True)
         except subprocess.CalledProcessError:
-            output = []
+            return ""
         return output.decode()
 
 
