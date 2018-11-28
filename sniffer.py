@@ -47,4 +47,8 @@ class Sniffer:
             if match:
                 results.append( { "address" : self.search_addr, "power" : -1 * int(match.group(1)) } )
         self.data_points = results
-        self.average_power = sum( list(data["power"] for data in results )) / len( results )
+
+        if self.data_points:
+            self.average_power = sum( list(data["power"] for data in results )) / len( results )
+        else:
+            self.average_power = None
