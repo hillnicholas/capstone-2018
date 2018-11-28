@@ -16,7 +16,7 @@ class Sniffer:
         self.channel = channel
         self.mon_iface = mon_iface
         self.search_addr = search_addr
-        self.timeout = 5000
+        self.timeout = 5
 
     def _prepare_interface(self):
         for command in [
