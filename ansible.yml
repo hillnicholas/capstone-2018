@@ -12,7 +12,7 @@
     - name: upgrade existing packages
       yum:
         name: "*"
-        state: latest
+        state: latest 
 
     - name: install docker
       yum:
