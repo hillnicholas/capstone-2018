@@ -16,7 +16,7 @@ class Sniffer:
         self.channel = channel
         self.mon_iface = mon_iface
         self.search_addr = search_addr
-
+        self.timeout = 5000
 
     def _prepare_interface(self):
         for command in [
@@ -29,7 +29,7 @@ class Sniffer:
     def _sniff( self, sniff_filter="", interface="", count=20 ):
         iface_flag = "-i" if interface else ""
         # ReMoTe CoDe eXeCuTiOn 
-        output = subprocess.check_output("tcpdump {} {} -c {} '{}'".format( iface_flag, interface, count, sniff_filter ),stderr=open(os.devnull, 'w'), shell=True)
+        output = subprocess.check_output("timeout {} tcpdump {} {} -c {} '{}'".format( self.timeout, iface_flag, interface, count, sniff_filter ),stderr=open(os.devnull, 'w'), shell=True)
         return output.decode()
 
 
