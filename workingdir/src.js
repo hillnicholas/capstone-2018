@@ -18,7 +18,7 @@ let scaleDistance = 20 ;
 let pixelToFoot = 174.0/ scaleDistance;
 let pixelToMeter = pixelToFoot / 0.3048;
 let calibrationDistance;
-let searchedMacAddress = "40:4E:36:5F:96:2E".split(":"); // = ['ff','ff','ff','ff','ff','ff'];
+let searchedMacAddress = null; //= ['ff','ff','ff','ff','ff','ff'];
 
 var width = window.innerWidth;
 var height = window.innerHeight;
@@ -400,10 +400,14 @@ function closeSettings() {
 
 function closeHistogram() { 
 	document.getElementById("histogramPopupBox").style.visibility = "hidden";
+	document.getElementById("histogramPopupBox").style.display = "none";
+
 }
 
 function clickedHistogram() {
 	document.getElementById("histogramPopupBox").style.visibility = "visible";
+	document.getElementById("histogramPopupBox").style.display = "block";
+
 	sendAllToBottom();
 	sendToTop( "histogramPopupBox");
 	generateHistogram();
@@ -592,8 +596,10 @@ function main() {
 }
 
 function fillMacAddress() { 
-	for(var i = 0; i < 6; i ++ ) {
-		document.getElementById("mac" + i).value = searchedMacAddress[i];
+	if( searchedMacAddress !== null ) { 
+		for(var i = 0; i < 6; i ++ ) {
+			document.getElementById("mac" + i).value = searchedMacAddress[i];
+		}
 	}
 }
 
