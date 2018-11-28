@@ -11,8 +11,9 @@ MON_IFACE = "mon0"
 
 @app.route('/rest/data')
 def get_data_from_sniffer():
-    mac_addr = request.args.get('mac_addr', '')
+    mac_addr = request.args.get('mac_addr', '').lower()
     channel = request.args.get('channel', '' )
+
 
     if not re.match('[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}', mac_addr ) or not re.match('[0-9]{1,2}', channel ):
         return json.dumps({})

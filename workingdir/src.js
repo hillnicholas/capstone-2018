@@ -18,7 +18,8 @@ let scaleDistance = 20 ;
 let pixelToFoot = 174.0/ scaleDistance;
 let pixelToMeter = pixelToFoot / 0.3048;
 let calibrationDistance;
-let searchedMacAddress = ['ff','ff','ff','ff','ff','ff'];
+let searchedMacAddress = "40:4E:36:5F:96:2E".split(":"); // = ['ff','ff','ff','ff','ff','ff'];
+
 var width = window.innerWidth;
 var height = window.innerHeight;
 
@@ -55,6 +56,11 @@ function reloadMap() {
 
 reloadMap();
 
+function onZoom( val ) {
+	scale = 0.6 -  (50 - val) * 0.02;
+	reloadMap();
+	clickedReset();
+}
 
 function onZoomOut() { 
     scale -= 0.02;
@@ -183,57 +189,7 @@ function drawAllPoints() {
 
 function onCalculation() {
     var distanceRadius, pos;
-    /*for( var i = 0; i < currentPoint - 1; i ++ ) {
 
-        pos = points[ i ].pos;
-        distanceRadius = points[ i ].distanceRadius;
-        layer.add(new Konva.Circle({
-		    x: pos.x,
-		    y: pos.y,
-			stroke: color,
-			fill: 'gray',
-			opacity: 0.2,
-            strokeWidth: 2,
-		    radius: distanceRadius
-		}));
-		layer.draw();
-    }
-    return;
-    // 
-	if( currentPoint - 1 < points.length ) { 
-		// now we find relative point
-
-		var color = 'black';
-
-		// PLACEHOLDER for power
-		//let max = -40;
-		//let min = -64;
-		//let power = Math.floor(Math.random() * (max - min) ) + min;
-
-
-		// draw point
-		/*layer.add(new Konva.Circle({
-		    x: pos.x,
-		    y: pos.y,
-		    fill: color,
-		    radius: 10
-		}));*
-
-		// draw radius
-		layer.add(new Konva.Circle({
-		    x: pos.x,
-		    y: pos.y,
-			stroke: color,
-			fill: 'gray',
-			opacity: 0.2,
-            strokeWidth: 2,
-		    radius: distanceRadius
-		}));
-		layer.draw();
-
-		currentPoint += 1;
-	}
-    */
 	if( currentPoint - 1 === points.length ) { 
 	
 		let specialPoints = Array(3);
@@ -441,7 +397,20 @@ function closeSettings() {
 	document.getElementById("settingsPopupBox").style.visibility = "hidden";
 }
 
+
+function closeHistogram() { 
+	document.getElementById("histogramPopupBox").style.visibility = "hidden";
+}
+
+function clickedHistogram() {
+	document.getElementById("histogramPopupBox").style.visibility = "visible";
+	sendAllToBottom();
+	sendToTop( "histogramPopupBox");
+	generateHistogram();
+}
+
 function clickedParameters() {
+	fillMacAddress();
 	document.getElementById("parametersPopupBox").style.visibility = "visible";
 	let currentMacAddress = searchedMacAddress ? searchedMacAddress.join(":") : "Not defined yet";
 	document.getElementById("currentMacAddress").innerText = "Current MAC address: " + currentMacAddress;
@@ -471,9 +440,17 @@ function startCalibration() {
 	}
 }
 
+// 1.3135x = ( y - 29.778 ) / 1.3135
+// 1.3135x + 29.778 = y 
 // calculate the radius of the range from the signal
 function getDistanceFromPower( power ) { 
-	return 0.0138 * Math.exp( -0.107 * power ) * pixelToMeter;
+	console.log( "POWER: " + power );
+
+	let answer = ( -0.7493 * power ) - 22.20;	
+	console.log( "ANSWER: " + answer);
+	return answer * pixelToMeter;
+	//return 1.3135 * power + 29.778 * pixelToMeter;
+	//return 0.0138 * Math.exp( -0.107 * power ) * pixelToMeter;
 }
 
 
@@ -487,28 +464,33 @@ function doCirclesIntersect(point1, point2 ) {
 
 let snifferData = [];
 let searchedChannel = 7;
+let debug;
 function requestSniffing() {
-
+	searchedChannel = document.getElementById('channelNumber').value;
     let macAddr = searchedMacAddress ? searchedMacAddress : "None";
     if( macAddr === "None" ) {
         document.getElementById("sniffMessage").innerHTML = "You must specify a MAC address. <button onClick='clickedParameters()'>Open parameter settings</button>";
         return;
     }
 
-	fetch('/rest/data?mac_addr=' + searchedMacAddress.join(":") + '&channel=' + searchedChannel )
+	fetch('/rest/data?mac_addr=' + searchedMacAddress.join(":").toLowerCase() + '&channel=' + searchedChannel )
 		.then( data => data.json() )
 		.then( resolvedData => {
-		console.log( 'data' + resolvedData );
+		console.log( resolvedData );
 		if( Object.keys(resolvedData).length === 0 ) {
-			document.getElementById("sniffMessage").innerText = "There was an error retrieving power from " + ":".join(searchedMacAddress) + ".";
+			document.getElementById("sniffMessage").innerText = "There was an error retrieving power from " + searchedMacAddress.join(":") + ".";
 		}
 		let power = resolvedData.averagePower;
-
+		let debug = resolvedData;
 		let distance = getDistanceFromPower( power ) / pixelToMeter;
 		console.log( distance );
 		if( snifferData.length < 7 ) {
 			document.getElementById("sniffMessage").innerHTML = "";
 
+			if(! resolvedData.mac_addr ) { 
+				console.log('ERRR');
+				document.getElementById("sniffMessage").innerText = "There was an error retrieving power from " + searchedMacAddress.join(":") + ".";
+			}
 			snifferData.push({
 				macAddr: resolvedData.mac_addr.split(":"),
 				power: resolvedData.averagePower,
@@ -549,6 +531,29 @@ function fillSnifferTable() {
 
 }
 
+function generateHistogram() { 
+	let alldata = snifferData.map( i => i.dataPoints.map( j => j.power ) )
+	//	.reduce( (x,y) => x.concat(y), [] );
+
+	trace = {
+		y: data,
+		type: 'histogram',
+	};
+	var trace, data, plotData = [ trace ];
+
+	for( var i = 0; i < snifferData.length; i ++ ) {
+		data = snifferData[i].dataPoints.map( i => i.power );
+		trace = {
+			name: "Trial " + (i + 1).toString(),
+			y: data,
+			type: 'histogram',
+	  	};
+		plotData.push( trace );
+	}
+	//console.log( data);
+	Plotly.newPlot('myDiv', plotData);
+}
+
 function requestRecord() {
 
 
@@ -586,7 +591,14 @@ function main() {
 	}
 }
 
+function fillMacAddress() { 
+	for(var i = 0; i < 6; i ++ ) {
+		document.getElementById("mac" + i).value = searchedMacAddress[i];
+	}
+}
+
 function updateMacAddress() {
+	searchedChannel = document.getElementById('channelNumber').value;
 	searchedMacAddress = [];
 	for(var i = 0; i < 6; i ++ ) {
 		searchedMacAddress.push( document.getElementById("mac" + i).value);
@@ -598,26 +610,29 @@ main();
 
 
 function login() {
-    
+	document.getElementById("loginErrorMessage").style.display = "none";
+
     // the most secure evar
     if( document.getElementById("username").value === "root" && document.getElementById("password").value === "capstone" ) {
+		document.getElementById("username").value = "";
+		document.getElementById("password").value = "";
         startLoader();
     }  
     else { 
-        document.getElementById("loginErrorMessage").style.display = "block";
+		setTimeout( () => document.getElementById("loginErrorMessage").style.display = "block", 500 );
     }
 }
 
 function logout() {
 	document.getElementById("login-screen").style.visibility = "visible";
 	document.getElementById("login-middle-loader").style.display = 'none';
-	document.getElementById("login-middle").style.display = 'block';
+	document.getElementById("the-login-stuff").style.display = 'block';
 
 }
 
 
 function startLoader() { 
-	document.getElementById("login-middle").style.display = 'none';
+	document.getElementById("the-login-stuff").style.display = 'none';
     document.getElementById("login-middle-loader").style.display = 'block';
     let counter = 0;
     let maxWidth = document.getElementById("ui-loader-wrapper").offsetWidth;

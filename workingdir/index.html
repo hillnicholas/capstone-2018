@@ -2,8 +2,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-        <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
     <script src="https://unpkg.com/konva@2.4.2/konva.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <meta charset="utf-8">
     <title>CS/CPE/EE 481 Capstone</title>
     
@@ -66,7 +67,7 @@
             left: 0;
             right: 0;
             top:0;
-            z-index: 10000;
+            z-index: 2;
             background-color: rgb(71, 81, 126);
             color: whitesmoke;
             position: absolute;
@@ -132,7 +133,7 @@
         visibility: hidden;
         position: absolute;
         width: 500px;
-        height: 200px;
+        /*height: 200px;*/
         top: 40%;
         left: 40%;
         z-index: 1;
@@ -260,7 +261,7 @@
     #login-middle {
         display: block;
         width: 350px;
-        margin: 200px auto;
+        margin: 100px auto;
         align-content: center;
         background-color: rgb(31, 31, 75);
         border-style: solid;
@@ -313,38 +314,62 @@
         display: none;
     }
 
+    #histogramPopupBox { 
+        visibility: hidden;
+        position: absolute;
+        width: 500px;
+        /*height: 200px;*/
+        top: 40%;
+        left: 40%;
+        z-index: 1;
+        background-color: whitesmoke;
+        border-color: gray;
+        border-width: 4px;
+        border-style: solid;
+    }
+    #histogramPopupBoxHeader { 
+        width: 98%;
+        height: 25px;
+        background-color: rgb(152, 143, 202);
+        padding-left: 2%;
+        color: whitesmoke;
+    }
     </style>
 </head>
 <body>
+        <div id="histogramPopupBox">
+            <div id="histogramPopupBoxHeader">Histogram<button style="float: right; padding: 2px;" onclick="closeHistogram()"> X </button></div>
+                <div id="myDiv"></div>
+        </div>
     <div id="login-screen">
         <div id="login-middle">
-
-            <span style="height: 100%; text-align: center">
-                <h1> WVU Capstone 2018 </h1>
-                <h3> Wifi Signal Source Localization </h3>
-                <h4> Nicholas Hill, Adam Ketterman, Waleed </h4>
-                <img  id="wvulogo" src="wvu.png">
-                <input type="text" id="username" placeholder="username">
-                <input type="password" id="password" placeholder="password">
-                <button id="login-button" onclick="login()">Log In</button>
-                <span id="loginErrorMessage"> Error: bad username or password.</span>
-            </span>
-        </div>
-        <div id="login-middle-loader">
-            loading...
-            <div id="ui-loader-wrapper">
-                <div id="ui-loader">
+            <div id="the-login-stuff">
+                <span style="height: 100%; text-align: center">
+                    <h1> WVU Capstone 2018 </h1>
+                    <h3> Wifi Signal Source Localization </h3>
+                    <h4> Nicholas Hill, Adam Ketterman, Waleed </h4>
+                    <img  id="wvulogo" src="wvu.png">
+                    <input type="text" id="username" placeholder="username">
+                    <input type="password" id="password" placeholder="password">
+                    <button id="login-button" onclick="login()">Log In</button>
+                    <span id="loginErrorMessage"> Error: bad username or password.</span>
+                </span>
+            </div>
+            <div id="login-middle-loader">
+                loading...
+                <div id="ui-loader-wrapper">
+                    <div id="ui-loader"></div>
                 </div>
             </div>
         </div>
-    </div>
-
+    </div>  
     <div id="container"></div>
     <script src="src.js"></script>
     <div id="settingsPopupBox">
         <div id="settingsPopupBoxHeader">Settings<button style="float: right; padding: 2px;" onclick="closeSettings()"> X </button></div>
         <div style="margin: 1px; padding: 10px; border-style: solid; border-width: 2px; width: 50%;">
             Zoom<br>
+            <div> <input type="range" min="0" max="100" oninput="onZoom(this.value)"></div>
             <button onClick=" onZoomIn()">Zoom In</button>
             <button onClick="onZoomOut()">Zoom Out</button>
         </div>  
@@ -369,6 +394,9 @@
             <input type="text" maxlength="2" size="1" id="mac4">:
             <input type="text" maxlength="2" size="1" id="mac5">
             <button onClick="updateMacAddress()">Update</button>
+            Searched Channel<br>
+            <input type="number" id="channelNumber" value='7'>
+            
         </div>
     </div>
     <div id="datapointsPopupBox">
@@ -423,6 +451,8 @@
             <div>
             <button onClick="requestSniffing()">sniff</button>
             <button onClick="requestRecord()">record</button>
+            <button onClick="clickedHistogram()">show histogram</button>
+
             <button onclick="requestFlushSnifferData()">reset</button>
             <div style="color: red;" id="sniffMessage"></div>
             </div> 

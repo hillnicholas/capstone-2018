@@ -58,3 +58,4 @@ function sendAllToBottom() {
 dragElement( document.getElementById( "settingsPopupBox" ));
 dragElement( document.getElementById( "parametersPopupBox" ));
 dragElement( document.getElementById( "datapointsPopupBox" ));
+dragElement( document.getElementById( "histogramPopupBox" ));
