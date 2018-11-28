@@ -495,30 +495,36 @@ function requestSniffing() {
         return;
     }
 
-	fetch('/rest/data?mac_addr=' + searchedMacAddress + '&channel=' + searchedChannel )
-		.then( data => console.log( "THE DATA: " + data ));
-    
-	power = 40;
-    let distance = getDistanceFromPower( power ) / pixelToMeter;
-    console.log( distance );
-    if( snifferData.length < 7 ) {
-        document.getElementById("sniffMessage").innerHTML = "";
+	fetch('/rest/data?mac_addr=' + searchedMacAddress.join(":") + '&channel=' + searchedChannel )
+		.then( data => data.json() )
+		.then( resolvedData => {
+		console.log( 'data' + resolvedData );
+		if( Object.keys(resolvedData).length === 0 ) {
+			document.getElementById("sniffMessage").innerText = "There was an error retrieving power from " + ":".join(searchedMacAddress) + ".";
+		}
+		let power = resolvedData.averagePower;
 
-        snifferData.push({
-            macAddr: macAddr,
-			power: averagePower,
-			points: points,
-            distance: distance
-        });
-        fillSnifferTable();
-        let average =  snifferData.reduce( ( i, obj ) => i + obj.power, 0 ) / snifferData.length;
-        
+		let distance = getDistanceFromPower( power ) / pixelToMeter;
+		console.log( distance );
+		if( snifferData.length < 7 ) {
+			document.getElementById("sniffMessage").innerHTML = "";
 
-        document.getElementById("averagePower").innerText = average.toString().length < 7 ? average.toString() : average.toString().substr(0,7); 
-    }
-    else { 
-        document.getElementById("sniffMessage").innerText = "Cannot sniff anymore.";
-    }
+			snifferData.push({
+				macAddr: resolvedData.mac_addr.split(":"),
+				power: resolvedData.averagePower,
+				dataPoints: resolvedData.dataPoints,
+				distance: distance
+			});
+			fillSnifferTable();
+			let average =  snifferData.reduce( ( i, obj ) => i + obj.power, 0 ) / snifferData.length;
+			
+
+			document.getElementById("averagePower").innerText = average.toString().length < 7 ? average.toString() : average.toString().substr(0,7); 
+		}
+		else { 
+			document.getElementById("sniffMessage").innerText = "Cannot sniff anymore.";
+		}
+	});
 }
 
 function fillSnifferTable() { 
