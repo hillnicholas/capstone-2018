@@ -124,7 +124,6 @@ calibrationParams = [];
 function onCalibrateDistance() { 
 	var pos = stage.getPointerPosition();
 	document.getElementById("calibrationMessage").innerText = "Now click a distance that is " + scaleDistance + " feet away.";
-	console.log( pos );
 	calibrateDistanceNumberOfClicks += 1;
 	layer.add(new Konva.Circle({
 		x: pos.x,
@@ -141,7 +140,6 @@ function onCalibrateDistance() {
 		mode = "calculation";
 		calibrateDistanceNumberOfClicks = 0;
 		document.getElementById("calibrationMessage").innerText = "The map has been calibrated.";
-		console.log( "ptm: "+ pixelToMeter);
 		calibrationParams = [];
 	} 
 }
@@ -184,7 +182,6 @@ function drawAllPoints() {
 }
 
 function onCalculation() {
-    console.log( points );
     var distanceRadius, pos;
     /*for( var i = 0; i < currentPoint - 1; i ++ ) {
 
@@ -246,7 +243,6 @@ function onCalculation() {
 			let point2 = points[ everyPoint[1] ];
 
 			if( doCirclesIntersect( point1, point2 )) { 
-				console.log( "intersects" );
 
 
 				// distance between 2 points
@@ -258,11 +254,8 @@ function onCalculation() {
 				let inBetween = (( point1.distanceRadius + point2.distanceRadius ) - distance ) / 2;
 				
 				let angle =  Math.PI - Math.atan2( point1.pos.y - point2.pos.y, point1.pos.x - point2.pos.x );
-				console.log( "rads : " + angle + " degs: " + angle * (180/Math.PI) );
 				let opposite = inBetween * Math.cos( angle );
-			
-				console.log( opposite );
-				
+							
 
 				let slopeOfLine =  (point2.pos.y - point1.pos.y ) / ( point2.pos.x - point1.pos.x );
 				let yInterceptofLine = -1 * slopeOfLine * point2.pos.x + point2.pos.y;
@@ -493,6 +486,7 @@ function doCirclesIntersect(point1, point2 ) {
 }
 
 let snifferData = [];
+let searchedChannel = 7;
 function requestSniffing() {
 
     let macAddr = searchedMacAddress ? searchedMacAddress : "None";
@@ -500,11 +494,11 @@ function requestSniffing() {
         document.getElementById("sniffMessage").innerHTML = "You must specify a MAC address. <button onClick='clickedParameters()'>Open parameter settings</button>";
         return;
     }
-    // PLACEHOLDER for power
-	let max = -40;
-	let min = -64;
-    let power = Math.floor(Math.random() * (max - min) ) + min;
-        
+
+	fetch('/rest/data?mac_addr=' + searchedMacAddress + '&channel=' + searchedChannel )
+		.then( data => console.log( "THE DATA: " + data ));
+    
+	power = 40;
     let distance = getDistanceFromPower( power ) / pixelToMeter;
     console.log( distance );
     if( snifferData.length < 7 ) {
@@ -512,7 +506,8 @@ function requestSniffing() {
 
         snifferData.push({
             macAddr: macAddr,
-            power: power,
+			power: averagePower,
+			points: points,
             distance: distance
         });
         fillSnifferTable();
@@ -550,8 +545,8 @@ function fillSnifferTable() {
 
 function requestRecord() {
 
+
     if( ! currentPosition ) { 
-        console.log( "NO POS");
         return;
     }
 
@@ -565,7 +560,6 @@ function requestRecord() {
     requestFlushSnifferData();
     }
     if( currentPoint >= 4 ) { 
-        console.log("FOUR!");
         onCalculation();
         return;
     } 
