@@ -406,7 +406,7 @@ function closeHistogram() {
 
 function clickedHistogram() {
 	document.getElementById("histogramPopupBox").style.visibility = "visible";
-	document.getElementById("histogramPopupBox").style.display = "block";
+	document.getElementById("histogramPopupBox").style.display = "block	";
 
 	sendAllToBottom();
 	sendToTop( "histogramPopupBox");
