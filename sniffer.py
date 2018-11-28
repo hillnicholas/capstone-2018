@@ -29,7 +29,7 @@ class Sniffer:
     def _sniff( self, sniff_filter="", interface="", count=20 ):
         iface_flag = "-i" if interface else ""
         # ReMoTe CoDe eXeCuTiOn 
-        output = subprocess.check_output("timeout {} tcpdump {} {} -c {} '{}'".format( self.timeout, iface_flag, interface, count, sniff_filter ),stderr=open(os.devnull, 'w'), shell=True)
+        output = subprocess.check_output("timeout {} /usr/sbin/tcpdump {} {} -c {} '{}'".format( self.timeout, iface_flag, interface, count, sniff_filter ),stderr=open(os.devnull, 'w'), shell=True)
         return output.decode()
 
 
