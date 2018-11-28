@@ -31,8 +31,8 @@ class Sniffer:
         # ReMoTe CoDe eXeCuTiOn 
         try:
             output = subprocess.check_output("timeout {} /usr/sbin/tcpdump {} {} -c {} '{}'".format( self.timeout, iface_flag, interface, count, sniff_filter ),stderr=open(os.devnull, 'w'), shell=True)
-        except subprocess.CalledProcessError:
-            return ""
+        except subprocess.CalledProcessError, e:
+            output = e.output
         return output.decode()
 
 
