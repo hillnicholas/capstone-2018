@@ -610,15 +610,15 @@ function login() {
 
 function logout() {
 	document.getElementById("login-screen").style.visibility = "visible";
-	document.getElementById("login-middle-loader")[0].style.display = 'hidden';
-	document.getElementById("login-middle").style.display = 'visible';
+	document.getElementById("login-middle-loader").style.display = 'none';
+	document.getElementById("login-middle").style.display = 'block';
 
 }
 
 
 function startLoader() { 
-	document.getElementById("login-middle").style.display = 'hidden';
-    document.getElementById("login-middle-loader").style.display = 'visible';
+	document.getElementById("login-middle").style.display = 'none';
+    document.getElementById("login-middle-loader").style.display = 'block';
     let counter = 0;
     let maxWidth = document.getElementById("ui-loader-wrapper").offsetWidth;
     let interval = setInterval( function() { 
