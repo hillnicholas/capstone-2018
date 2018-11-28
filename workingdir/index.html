@@ -257,7 +257,7 @@
     }
 
 
-    .login-middle {
+    #login-middle {
         display: block;
         width: 350px;
         margin: 200px auto;
@@ -308,11 +308,16 @@
         border-style: solid;
         border-radius: 5px;
     }
+
+    #login-middle-loader { 
+        display: none;
+    }
+
     </style>
 </head>
 <body>
     <div id="login-screen">
-        <div class="login-middle">
+        <div id="login-middle">
 
             <span style="height: 100%; text-align: center">
                 <h1> WVU Capstone 2018 </h1>
@@ -324,6 +329,13 @@
                 <button id="login-button" onclick="login()">Log In</button>
                 <span id="loginErrorMessage"> Error: bad username or password.</span>
             </span>
+        </div>
+        <div id="login-middle-loader">
+            loading...
+            <div id="ui-loader-wrapper">
+                <div id="ui-loader">
+                </div>
+            </div>
         </div>
     </div>
 

@@ -610,17 +610,15 @@ function login() {
 
 function logout() {
 	document.getElementById("login-screen").style.visibility = "visible";
+	document.getElementById("login-middle-loader")[0].style.display = 'hidden';
+	document.getElementById("login-middle").style.display = 'visible';
+
 }
 
 
 function startLoader() { 
-    document.getElementsByClassName("login-middle")[0].innerHTML = `
-        loading...
-        <div id="ui-loader-wrapper">
-            <div id="ui-loader">
-            </div>
-        </div>
-    `
+	document.getElementById("login-middle").style.display = 'hidden';
+    document.getElementById("login-middle-loader").style.display = 'visible';
     let counter = 0;
     let maxWidth = document.getElementById("ui-loader-wrapper").offsetWidth;
     let interval = setInterval( function() { 
